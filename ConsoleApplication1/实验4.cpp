@@ -63,6 +63,21 @@ BSP Getstop(slink S)
 	return(NULL);
 }
 /**********************堆栈操作结束***********************/
+int isSame(char x[], char y[])
+{
+	int i = 0;
+	while (x[i]!=-51 && x[i]!=-52 && y[i] != -51 && y[i] != -52)
+	{
+		if (x[i] != y[i])
+		{
+			return(0);
+		}
+		i++;
+	}
+	if (x[0] == -51 || x[0] == -52 || y[0] == -51 || y[0] == -52)
+		return(0);
+	return(1);
+}
 BSP BSTinsert(BSP T, BSP S)
 {
 	BSP p, q;
@@ -75,7 +90,7 @@ BSP BSTinsert(BSP T, BSP S)
 	while (p)
 	{
 		q = p;
-		if (strcmp(S->data, p->data) == 0)
+		if (/*strcmp(S->data, p->data) == 0*/isSame(S->data,p->data)==1)
 		{
 			free(S);
 			return(T);
@@ -119,33 +134,74 @@ BSP createBst()
 	BSP T, S;
 	char key[20];
 	T = NULL;
-	printf("请输入英文句子，以'.'结束:");
-	scanf("%s", key);
-	while (isEnd(key,'.'))
+	int isFromFile;
+	FILE *fpRead = fopen("data.txt", "r");
+	printf("请选择输入方式：1.文件输入；2.键盘输入\n");
+	scanf("%d", &isFromFile);
+	if (isFromFile == 2)
 	{
+		printf("请输入英文句子，以'.'结束:");
+		scanf("%s", key);
+		while (isEnd(key, '.'))
+		{
+			S = (BSP)malloc(sizeof(BSN));
+			int i = 0;
+			while (key[i] != '\0')
+			{
+				S->data[i] = key[i];
+				i++;
+			}
+			S->Lchild = S->Rchild = NULL;
+			T = BSTinsert(T, S);
+			memset(key, 0, 20);
+			scanf("%s", key);
+		}
 		S = (BSP)malloc(sizeof(BSN));
 		int i = 0;
-		while (key[i]!='\0')
-		{		
+		while (key[i] != '\0')
+		{
 			S->data[i] = key[i];
+
 			i++;
 		}
 		S->Lchild = S->Rchild = NULL;
 		T = BSTinsert(T, S);
-		scanf("%s", key);
+
+		return(T);
 	}
-	S = (BSP)malloc(sizeof(BSN));
-	int i = 0;
-	while (key[i] != '\0')
+	else
 	{
-		S->data[i] = key[i];
+		if (fpRead == NULL)
+		{
+			printf("文件不存在……");
+		}
+		while (isEnd(key, '.'))
+		{
+			S = (BSP)malloc(sizeof(BSN));
+			int i = 0;
+			while (key[i] != '\0')
+			{
+				S->data[i] = key[i];
+				i++;
+			}
+			S->Lchild = S->Rchild = NULL;
+			T = BSTinsert(T, S);
+			memset(key, 0, 20);
+			fscanf(fpRead,"%s", key);
+		}
+		S = (BSP)malloc(sizeof(BSN));
+		int i = 0;
+		while (key[i] != '\0')
+		{
+			S->data[i] = key[i];
 
-		i++;
+			i++;
+		}
+		S->Lchild = S->Rchild = NULL;
+		T = BSTinsert(T, S);
+
+		return(T);
 	}
-	S->Lchild = S->Rchild = NULL;
-	T = BSTinsert(T, S);
-
-	return(T);
 }
 
 /***********递归遍历*********
@@ -194,7 +250,7 @@ void inOrderLDR(BSP T)
 		if (!Emptystack(S))
 		{
 			p = Pop(&S);
-			while (p->data[i] != -51&&p->data[i]!='.')
+			while (p->data[i] != -51 && p->data[i]!='.' && p->data[i] != -52)
 			{
 				printf("%c", p->data[i]);
 				i++;
